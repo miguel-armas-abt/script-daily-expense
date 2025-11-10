@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Categorizar gasto</title>
+
+  <!-- Bootstrap / Icons -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Tus estilos globales -->
+  <?!= HtmlService.createHtmlOutputFromFile('WebAppExpenseStyles').getContent(); ?>
+</head>
+<body>
+  <!-- Loader global -->
+  <div id="globalLoader" class="loader-overlay d-none">
+    <div class="spinner-border loader-spinner" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="py-3">
+    <div class="container-narrow d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-2">
+        <div class="btn-icon bg-light border">
+          <i class="fa-solid fa-wallet"></i>
+        </div>
+        <div>
+          <h1 class="h5 mb-0 fw-bold">Daily Expense — Categorizar gasto</h1>
+          <small class="text-muted">Actualiza importe, categoría y comentarios</small>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" aria-label="Cambiar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="container-narrow">
+    <div class="card-surface p-3 p-md-4">
+      <!-- Summary -->
+      <ul class="summary mb-3">
+        <li class="item">
+          <span class="label">Fecha</span>
+          <span class="value"><?= expenseDate || '' ?></span>
+        </li>
+        <li class="item">
+          <span class="label">Origen</span>
+          <span class="value"><?= source || '' ?> (<?= kind || '' ?>)</span>
+        </li>
+        <li class="item">
+          <span class="label">Mensaje</span>
+          <span class="value text-truncate" title="<?= gmailMessageId ?>"><?= gmailMessageId || '—' ?></span>
+        </li>
+      </ul>
+
+      <!-- Form -->
+      <form id="expense-form" novalidate class="needs-validation">
+        <input type="hidden" id="gmailMessageId" name="gmailMessageId" value="<?= gmailMessageId ?>">
+
+        <div class="row g-3">
+          <!-- Amount -->
+          <div class="col-12 col-md-4">
+            <label for="amountInput" class="form-label">Importe</label>
+            <input
+              id="amountInput"
+              name="amount"
+              class="form-control"
+              inputmode="decimal"
+              placeholder="Ej: 125.50"
+              autocomplete="off"
+              value="<?= amount || '' ?>"
+            />
+            <div class="invalid-feedback">Ingrese un número válido o deje vacío.</div>
+          </div>
+
+          <!-- Category -->
+          <div class="col-12 col-md-4">
+            <label for="categoryInput" class="form-label">Categoría <span class="text-danger">*</span></label>
+            <input
+              id="categoryInput"
+              name="category"
+              list="categoryOptions"
+              placeholder="Seleccione o escriba la categoría"
+              class="form-control"
+              required
+              autocomplete="off"
+            />
+            <datalist id="categoryOptions">
+              <? for (var i = 0; i < categories.length; i++) { ?>
+                <option value="<?= categories[i] ?>"></option>
+              <? } ?>
+            </datalist>
+            <div class="invalid-feedback">La categoría es obligatoria.</div>
+          </div>
+
+          <!-- Comments -->
+          <div class="col-12 col-md-4">
+            <label for="comments" class="form-label">Comentario</label>
+            <input
+              id="comments"
+              name="comments"
+              class="form-control"
+              placeholder="Escriba un comentario"
+              autocomplete="off"
+              value="<?= comments || '' ?>"
+            />
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button id="saveBtn" type="submit" class="btn btn-brand flex-grow-1" disabled>
+            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar
+          </button>
+          <button type="button" id="resetBtn" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-rotate-left me-2"></i>Reset
+          </button>
+        </div>
+
+        <div id="statusArea" class="visually-hidden" aria-live="polite"></div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Toasts host -->
+  <div id="toastHost" class="toast-container"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+  <!-- App JS -->
+  <script>
+    (function(){
+      // ===== Theme toggle with persistence
+      var themeBtn = document.getElementById('themeToggle');
+      function applyTheme(mode){
+        document.body.classList.toggle('dark-mode', mode === 'dark');
+        themeBtn.innerHTML = '<i class="fa-solid ' + (mode === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i>';
+      }
+      var saved = localStorage.getItem('dex_theme');
+      applyTheme(saved || 'light');
+      themeBtn.addEventListener('click', function(){
+        var mode = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('dex_theme', mode);
+        applyTheme(mode);
+      });
+
+      // ===== Helpers
+      var $ = function(id){ return document.getElementById(id); };
+      var form = $('expense-form');
+      var saveBtn = $('saveBtn');
+      var resetBtn = $('resetBtn');
+      var amountInput = $('amountInput');
+      var categoryInput = $('categoryInput');
+      var commentsInput = $('comments');
+      var statusArea = $('statusArea');
+      var loader = $('globalLoader');
+
+      function showLoader(show){ loader.classList.toggle('d-none', !show); }
+      function numericOrEmpty(v){
+        if (!v) return true;
+        var n = Number(String(v).replace(',', '.'));
+        return !isNaN(n);
+      }
+      function setBusy(btn, busy){
+        if (!btn) return;
+        btn.disabled = busy;
+        btn.setAttribute('aria-busy', busy ? 'true' : 'false');
+      }
+      function toast(msg, ok){
+        var host = $('toastHost');
+        var id = 't' + Date.now();
+        var el = document.createElement('div');
+        el.className = 'toast align-items-center text-bg-' + (ok ? 'success' : 'danger') + ' border-0';
+        el.id = id;
+        el.role = 'status';
+        el.ariaLive = 'polite';
+        el.ariaAtomic = 'true';
+        el.innerHTML = '<div class="d-flex"><div class="toast-body">'+ msg +'</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>';
+        host.appendChild(el);
+        var t = new bootstrap.Toast(el, { delay: 3500 });
+        t.show();
+        el.addEventListener('hidden.bs.toast', function(){ el.remove(); });
+      }
+
+      // ===== Validation
+      function validate(){
+        var validCategory = categoryInput.value.trim().length > 0;
+        var validAmount = numericOrEmpty(amountInput.value.trim());
+        if (!validAmount){
+          amountInput.classList.add('is-invalid');
+        } else {
+          amountInput.classList.remove('is-invalid');
+        }
+        saveBtn.disabled = !(validCategory && validAmount);
+        return !saveBtn.disabled;
+      }
+      categoryInput.addEventListener('input', validate);
+      amountInput.addEventListener('input', validate);
+
+      // ===== Reset
+      resetBtn.addEventListener('click', function(){
+        amountInput.value = "<?= amount || '' ?>";
+        categoryInput.value = "";
+        commentsInput.value = "<?= comments || '' ?>";
+        validate();
+      });
+
+      // ===== Submit
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        if (!validate()) return;
+
+        var payload = {
+          gmailMessageId: $('gmailMessageId').value,
+          category: categoryInput.value.trim(),
+          comments: commentsInput.value.trim(),
+          amount: amountInput.value.trim()
+        };
+
+        statusArea.textContent = 'Guardando…';
+        setBusy(saveBtn, true);
+        showLoader(true);
+
+        google.script.run
+          .withSuccessHandler(function(){
+            setBusy(saveBtn, false);
+            showLoader(false);
+            statusArea.textContent = 'Guardado correctamente.';
+            toast('Guardado con éxito. El gasto fue categorizado y/o actualizado.', true);
+          })
+          .withFailureHandler(function(err){
+            setBusy(saveBtn, false);
+            showLoader(false);
+            statusArea.textContent = 'Error al guardar.';
+            var msg = (err && err.message) ? err.message : 'No se pudo guardar. Inténtalo nuevamente.';
+            toast(msg, false);
+          })
+          .saveExpenseCategory(payload);
+      });
+
+      // Initial state
+      validate();
+    })();
+  </script>
+</body>
+</html>

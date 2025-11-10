@@ -1,0 +1,25 @@
+{
+  "name": "apps-expenses",
+  "version": "1.0.0",
+  "description": "Daily Expense (Apps Script) — TS + esbuild + clasp",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src --ext .ts",
+    "build": "node build.mjs",
+    "push": "npm run build && clasp push",
+    "pull": "clasp pull",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/google-apps-script": "^1.0.81",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "cpx": "^1.5.0",
+    "esbuild": "^0.24.2",
+    "eslint": "^9.13.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
