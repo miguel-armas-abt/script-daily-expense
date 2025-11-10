@@ -4,13 +4,11 @@
   "description": "Daily Expense (Apps Script) — TS + esbuild + clasp",
   "type": "module",
   "scripts": {
-    
     "lint": "eslint src --ext .ts",
     "build": "node build.mjs",
     "push": "npm run build && clasp push",
     "pull": "clasp pull",
     "watch": "tsc -w",
-    
     "build:gas": "tsc -p tsconfig.gaslocal.json && node -e \"require('fs').writeFileSync('dist-test/package.json','{\\\"type\\\":\\\"commonjs\\\"}')\"",
     "test:gas": "node test/test-runner.cjs"
   },

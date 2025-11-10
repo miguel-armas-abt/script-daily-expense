@@ -1,7 +1,8 @@
 import { ExpenseDto } from '../../dto/ExpenseDto';
 import { AppConstants } from '../../constants/AppConstants';
-import { UtilNumberFormatter } from '../../utils/UtilNumberFormatter';
+import { NumberFormatter } from '../../utils/NumberFormatter';
 import type { ExpenseBodyMapper } from '../ExpenseBodyMapper';
+import { CurrencyConstants } from '../../enums/Currency';
 
 function extractRecipient(bodyHtml: string): string {
   let recipient: string = AppConstants.DEFAULT;
@@ -28,7 +29,7 @@ export const BBVAPlinMapper: ExpenseBodyMapper = {
   },
   toExpenseDto(bodyHtml: string): ExpenseDto {
     const amountText = bodyHtml.match(/Plineaste\s*S\/&nbsp;?([0-9]+(?:[.,][0-9]{2})?)/i);
-    const amountNumber = UtilNumberFormatter.parseNumber(amountText);
+    const amountNumber = NumberFormatter.parseNumber(amountText);
     let recipient: string = AppConstants.DEFAULT;
     if (amountText && typeof (amountText as any).index === 'number') {
       const idx = (amountText as any).index as number;
@@ -40,9 +41,8 @@ export const BBVAPlinMapper: ExpenseBodyMapper = {
 
     return new ExpenseDto({
       amount: amountNumber,
-      currency: AppConstants.CURRENCY_PEN,
-      source: 'BBVA',
-      kind: 'PLIN',
+      currency: CurrencyConstants.CURRENCY_PEN,
+      source: 'BBVA - PLIN',
       comments: recipient
     });
   }

@@ -1,7 +1,8 @@
 import { ExpenseDto } from '../../dto/ExpenseDto';
 import { AppConstants } from '../../constants/AppConstants';
-import { UtilNumberFormatter } from '../../utils/UtilNumberFormatter';
+import { NumberFormatter } from '../../utils/NumberFormatter';
 import type { ExpenseBodyMapper } from '../ExpenseBodyMapper';
+import { CurrencyConstants } from '../../enums/Currency';
 
 function extractAmountMatch(html: string): RegExpMatchArray | null {
   const idx = html.search(/Moneda\s*y\s*monto\s*:?/i);
@@ -41,14 +42,13 @@ export const IBKPlinMapper: ExpenseBodyMapper = {
   },
   toExpenseDto(bodyHtml: string): ExpenseDto {
     const amountNumberMatch = extractAmountMatch(bodyHtml);
-    const amountNumber = UtilNumberFormatter.parseNumber(amountNumberMatch);
+    const amountNumber = NumberFormatter.parseNumber(amountNumberMatch);
     const recipient = extractRecipient(bodyHtml);
 
     return new ExpenseDto({
       amount: amountNumber,
-      currency: AppConstants.CURRENCY_PEN,
-      source: 'INTERBANK',
-      kind: 'PLIN',
+      currency: CurrencyConstants.CURRENCY_PEN,
+      source: 'INTERBANK - PLIN',
       comments: recipient || AppConstants.DEFAULT
     });
   }

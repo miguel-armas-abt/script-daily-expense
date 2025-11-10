@@ -1,14 +1,11 @@
-import type { Currency } from './../constants/AppConstants';
+import type { Currency } from '../enums/Currency';
+import { Strings } from '../constants/Strings';
 
 export type ExpenseDtoArgs = {
   gmailMessageId?: string;
   source?: string;
-  kind?: string;
   amount?: number | null;
-  currency?: Currency | string;
-  expenseDate?: any;
-  subject?: string;
-  from?: string;
+  currency?: Currency | null;
   comments?: string;
   category?: string;
 };
@@ -16,40 +13,17 @@ export type ExpenseDtoArgs = {
 export class ExpenseDto {
   gmailMessageId: string;
   source: string;
-  kind: string;
   amount: number | null;
-  currency: string;
-  expenseDate: any;
-  subject: string;
-  from: string;
+  currency: Currency | null;
   comments: string;
-  category?: string;
+  category: string;
 
   constructor(args: ExpenseDtoArgs) {
-    this.gmailMessageId = args.gmailMessageId || '';
-    this.source = args.source || '';
-    this.kind = args.kind || '';
+    this.gmailMessageId = args.gmailMessageId || Strings.EMPTY;
+    this.source = args.source || Strings.EMPTY;
     this.amount = args.amount != null ? args.amount : null;
-    this.currency = args.currency || '';
-    this.expenseDate = args.expenseDate || '';
-    this.subject = args.subject || '';
-    this.from = args.from || '';
-    this.comments = args.comments || '';
-    this.category = args.category;
-  }
-
-  toRepositoryPayload() {
-    return {
-      gmailMessageId: this.gmailMessageId,
-      source: this.source,
-      kind: this.kind,
-      amount: this.amount,
-      currency: this.currency,
-      expenseDate: this.expenseDate,
-      subject: this.subject,
-      from: this.from,
-      comments: this.comments,
-      category: this.category
-    };
+    this.currency = args.currency != null ? args.currency : null;
+    this.comments = args.comments || Strings.EMPTY;
+    this.category = args.category || Strings.EMPTY;
   }
 }

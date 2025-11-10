@@ -1,12 +1,23 @@
 import { ExpenseDto } from '../../dto/ExpenseDto';
 import { AppConstants } from '../../constants/AppConstants';
-import { UtilNumberFormatter } from '../../utils/UtilNumberFormatter';
+import { NumberFormatter } from '../../utils/NumberFormatter';
 import type { ExpenseBodyMapper } from '../ExpenseBodyMapper';
+import { Currency, CurrencyConstants } from '../../enums/Currency';
 
-function extractCurrency(bodyHtml: string): string {
+function extractCurrency(bodyHtml: string): Currency {
   const currencyMatch = bodyHtml.match(/Moneda:\s*<\/p>\s*<p[^>]*>\s*([A-Z]{3})/i);
-  if (currencyMatch) return currencyMatch[1].toUpperCase();
-  return /\bS\/\b/i.test(bodyHtml) ? AppConstants.CURRENCY_PEN : AppConstants.CURRENCY_USD;
+  if (currencyMatch) {
+    const code = currencyMatch[1].toUpperCase();
+    switch (code) {
+      case 'PEN':
+      case 'S/':
+        return CurrencyConstants.CURRENCY_PEN;
+      case 'USD':
+      case 'US$':
+        return CurrencyConstants.CURRENCY_USD;
+    }
+  }   
+  return /\bS\/\b/i.test(bodyHtml) ? CurrencyConstants.CURRENCY_PEN : CurrencyConstants.CURRENCY_USD;
 }
 
 function extractMerchantName(bodyHtml: string): string {
@@ -44,15 +55,14 @@ export const BBVACardSpendingMapper: ExpenseBodyMapper = {
   },
   toExpenseDto(bodyHtml: string): ExpenseDto {
     const amountText = bodyHtml.match(/Monto:\s*<\/p>\s*<p[^>]*>\s*([0-9]+(?:[.,][0-9]{2})?)/i);
-    const amountNumber = UtilNumberFormatter.parseNumber(amountText);
+    const amountNumber = NumberFormatter.parseNumber(amountText);
     const currency = extractCurrency(bodyHtml);
     const merchantName = extractMerchantName(bodyHtml);
 
     return new ExpenseDto({
       amount: amountNumber,
       currency,
-      source: 'BBVA',
-      kind: 'TARJETA',
+      source: 'BBVA - TARJETA',
       comments: merchantName
     });
   }

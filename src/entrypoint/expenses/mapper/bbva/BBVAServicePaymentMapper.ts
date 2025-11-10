@@ -1,7 +1,8 @@
 import { ExpenseDto } from '../../dto/ExpenseDto';
 import { AppConstants } from '../../constants/AppConstants';
-import { UtilNumberFormatter } from '../../utils/UtilNumberFormatter';
+import { NumberFormatter } from '../../utils/NumberFormatter';
 import type { ExpenseBodyMapper } from '../ExpenseBodyMapper';
+import { CurrencyConstants } from '../../enums/Currency';
 
 function extractServiceName(bodyHtml: string): string {
   const serviceNameMatch = bodyHtml.match(/Nombre\s+(?:de\s+)?servicio<\/p>\s*<p[^>]*>\s*([^<]+)/i);
@@ -18,14 +19,13 @@ export const BBVAServicePaymentMapper: ExpenseBodyMapper = {
     const amountText =
       bodyHtml.match(/Importe\s+pagado[^<]*?<[^>]*?>\s*S\/\s*([0-9]+(?:[.,][0-9]{2})?)/i) ||
       bodyHtml.match(/S\/\s*([0-9]+(?:[.,][0-9]{2})?)/i);
-    const amountNumber = UtilNumberFormatter.parseNumber(amountText);
+    const amountNumber = NumberFormatter.parseNumber(amountText);
     const serviceName = extractServiceName(bodyHtml);
 
     return new ExpenseDto({
       amount: amountNumber,
-      currency: AppConstants.CURRENCY_PEN,
-      source: 'BBVA',
-      kind: 'SERVICIO',
+      currency: CurrencyConstants.CURRENCY_PEN,
+      source: 'BBVA - SERVICIO',
       comments: serviceName
     });
   }

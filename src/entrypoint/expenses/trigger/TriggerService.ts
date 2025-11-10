@@ -1,5 +1,5 @@
 /// <reference types="google-apps-script" />
-import { AppConstants } from './expenses/constants/AppConstants';
+import { Props } from '../constants/Props';
 
 export const TriggerService = (() => {
   function deleteExisting(handlerFuncName: string) {
@@ -12,9 +12,7 @@ export const TriggerService = (() => {
 
   function createTimeTriggerEveryMinutes(handlerFuncName: string) {
     deleteExisting(handlerFuncName);
-    const mins =
-      Number(PropertiesService.getScriptProperties().getProperty(AppConstants.PROP_TRIGGER_EVERY_MINUTES)) ||
-      AppConstants.DEFAULT_TRIGGER_MINUTES;
+    const mins = Number(PropertiesService.getScriptProperties().getProperty(Props.TRIGGER_EVERY_MINUTES));
 
     ScriptApp.newTrigger(handlerFuncName).timeBased().everyMinutes(Math.max(1, Math.min(30, mins))).create();
   }

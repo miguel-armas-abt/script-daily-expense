@@ -1,3 +1,3 @@
-export * as expensesRepository from './expenses/repository/ExpenseRepository';
-export * as mailer from './expenses/repository/Mailer';
+export * as expensesRepository from './expenses/repository/expense/ExpenseRepository';
+export * as mailer from './expenses/repository/gmail/GmailRepository';
 export * as expenseIdentifierService from './expenses/service/ExpenseIdentifierService';
