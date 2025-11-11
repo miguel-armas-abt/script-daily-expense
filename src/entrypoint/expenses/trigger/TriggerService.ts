@@ -2,6 +2,7 @@
 import { Props } from '../constants/Props';
 
 export const TriggerService = (() => {
+  
   function deleteExisting(handlerFuncName: string) {
     ScriptApp.getProjectTriggers().forEach((t) => {
       if (t.getHandlerFunction && t.getHandlerFunction() === handlerFuncName) {

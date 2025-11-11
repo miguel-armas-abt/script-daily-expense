@@ -6,7 +6,7 @@ import { ExpenseDto } from '../dto/ExpenseDto';
 import { CurrencyConstants } from '../enums/Currency';
 
 // === WebApp (doGet) y endpoints ===
-function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutput {
+export function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutput {
   const params = (e && e.parameter) || ({} as Record<string, string>);
   const action = params.action || 'edit';
 
@@ -34,7 +34,7 @@ function doGet(e: GoogleAppsScript.Events.DoGet): GoogleAppsScript.HTML.HtmlOutp
   return html.setTitle('Error');
 }
 
-function saveExpenseCategory(payload: {
+export function saveExpenseCategory(payload: {
   gmailMessageId: string;
   category: string;
   comments?: string;
@@ -57,7 +57,7 @@ function saveExpenseCategory(payload: {
   return true;
 }
 
-function saveNewExpense(payload: {
+export function saveNewExpense(payload: {
   amount: string;
   category: string;
   comments?: string;
@@ -91,8 +91,3 @@ function saveNewExpense(payload: {
   ExpenseRepository.sortByExpenseDateDesc();
   return id;
 }
-
-// === Expone en global (GAS necesita funciones globales) ===
-(globalThis as any).doGet = doGet;
-(globalThis as any).saveExpenseCategory = saveExpenseCategory;
-(globalThis as any).saveNewExpense = saveNewExpense;

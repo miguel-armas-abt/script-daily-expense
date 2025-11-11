@@ -5,7 +5,6 @@ import { AppConstants } from '../../constants/AppConstants';
 import { Strings } from '../../constants/Strings';
 import { ExpenseDto } from '../../dto/ExpenseDto';
 import { TimeUtil } from '../../utils/TimeUtil';
-import { EmailWrapper } from '../gmail/wrapper/EmailWrapper';
 
 export const ExpenseRepository = (() => {
   function getSheet(): GoogleAppsScript.Spreadsheet.Sheet {

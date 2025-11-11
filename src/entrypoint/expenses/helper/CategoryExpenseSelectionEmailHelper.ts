@@ -3,7 +3,6 @@ import { GmailRepository } from '../repository/gmail/GmailRepository.js';
 import { Props } from '../constants/Props.js';
 import { ExpenseDto } from '../dto/ExpenseDto.js';
 import { Properties } from '../config/Properties.js';
-import { EmailWrapper } from '../repository/gmail/wrapper/EmailWrapper.js';
 import { TimeUtil } from '../utils/TimeUtil.js';
 
 export const CategoryExpenseSelectionEmailHelper = (() => {

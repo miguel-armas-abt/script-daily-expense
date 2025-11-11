@@ -1,21 +1,38 @@
 import { build } from 'esbuild';
+import fs from 'fs';
+import path from 'path';
 import { execSync } from 'node:child_process';
 
-// 1) Transpila TS a dist-tmp según tsconfig.json
-execSync('npx tsc', { stdio: 'inherit' });
+const ROOT = process.cwd();
+const SRC = path.join(ROOT, 'src');
+const DIST = path.join(ROOT, 'dist');
 
-// 2) Bundle a IIFE para Apps Script
+// 1) Clean dist
+fs.rmSync(DIST, { recursive: true, force: true });
+fs.mkdirSync(DIST, { recursive: true });
+
+// 2) Direct bundle from TS (IIFE format)
 await build({
-  entryPoints: ['dist-tmp/main.js'],       // main.js lo generamos más abajo en server/main.ts
+  entryPoints: [path.join(SRC, 'entrypoint', 'index.ts')],
   bundle: true,
-  outfile: 'dist/bundle.js',
+  outfile: path.join(DIST, 'bundle.js'),
   target: 'es2020',
   format: 'iife',
-  // No usamos globalName para evitar encapsulado, nosotros exponemos manualmente a globalThis
+  globalName: 'App',
+  platform: 'browser',
+  sourcemap: true
 });
 
-// 3) Copia assets (HTML + manifest) a dist/
+// 3) Copy assets (HTML + manifest) to dist/
 execSync('npx cpx "src/web/**/*" dist', { stdio: 'inherit' });
 execSync('npx cpx "src/appsscript.json" dist', { stdio: 'inherit' });
 
-console.log('✔ Build completo: dist/bundle.js + assets copiados.');
+// 4) Copy .gs
+const shimSrc = path.join(SRC, 'EntryPoints.gs');
+if (!fs.existsSync(shimSrc)) {
+  console.error('src/EntryPoints.gs doesnt exist');
+  process.exit(1);
+}
+fs.copyFileSync(shimSrc, path.join(DIST, 'EntryPoints.gs'));
+
+console.log('Build success');
