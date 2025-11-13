@@ -1,4 +1,4 @@
-export const WebAppOptions = Object.freeze({
+export const Categories = Object.freeze({
 
   MANUALLY: 'MANUAL',
 

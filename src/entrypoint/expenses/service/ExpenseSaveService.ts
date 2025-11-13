@@ -1,5 +1,5 @@
 import { Strings } from "../constants/Strings";
-import { WebAppOptions } from "../constants/WebAppOptions";
+import { Categories } from "../constants/Categories";
 import { ExpenseDto } from "../dto/ExpenseDto";
 import { CurrencyConstants } from "../enums/Currency";
 import { ExpenseRepository } from "../repository/expense/ExpenseRepository";
@@ -27,7 +27,7 @@ const ExpenseSaveService = (() => {
 
         const expense = new ExpenseDto({
             gmailMessageId: Utilities.getUuid(),
-            source: WebAppOptions.MANUALLY,
+            source: Categories.MANUALLY,
             amount: amountNum,
             currency: CurrencyConstants.CURRENCY_PEN,
             comments,

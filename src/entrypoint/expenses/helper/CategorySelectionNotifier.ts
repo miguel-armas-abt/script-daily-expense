@@ -4,6 +4,7 @@ import { Props } from '../constants/Props.js';
 import { ExpenseDto } from '../dto/ExpenseDto.js';
 import { Properties } from '../config/Properties.js';
 import { TimeUtil } from '../utils/TimeUtil.js';
+import { WebActions } from '../constants/WebAction.js';
 
 export const CategorySelectionNotifier = (() => {
 
@@ -24,7 +25,7 @@ export const CategorySelectionNotifier = (() => {
         const expenseDate = TimeUtil.toString(date);
 
         const url = buildURL({
-            action: 'edit',
+            action: WebActions.UPDATE,
             gmailMessageId: expense.gmailMessageId,
             amount: expense.amount || Strings.EMPTY,
             expenseDate: expenseDate,
@@ -43,6 +44,7 @@ export const CategorySelectionNotifier = (() => {
                 '<br>',
                 '<b>Origen:</b> ',
                 expense.source || Strings.EMPTY,
+                '<br>',
                 '<b>Destino:</b> ',
                 expense.comments || Strings.EMPTY,
                 '<br>',
