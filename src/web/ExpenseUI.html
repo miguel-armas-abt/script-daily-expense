@@ -1,688 +1,727 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Gestión de gastos</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Gestión de gastos</title>
 
-  <!-- Bootstrap / Icons -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <!-- Bootstrap / Icons -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-  <!-- Estilos globales -->
-  <?!= HtmlService.createHtmlOutputFromFile('Styles').getContent(); ?>
+    <!-- Estilos globales -->
+    <?!= HtmlService.createHtmlOutputFromFile('Styles').getContent(); ?>
 
-  <style>
-    /* Tabs pill modernos, sin línea inferior */
-    .nav-tabs-custom{
-      border-bottom:none !important;
-      display:flex;
-      gap:.4rem;
-      flex-wrap:wrap;
-    }
-    .nav-tabs-custom .nav-link{
-      border-radius:999px;
-      padding:.35rem .9rem;
-      font-weight:600;
-      color:var(--muted);
-      border:none;
-      background:transparent;
-    }
-    .nav-tabs-custom .nav-link:hover{
-      background:rgba(0,0,0,0.03);
-    }
-    .nav-tabs-custom .nav-link.active{
-      background:var(--brand);
-      color:#fff;
-    }
-    .tab-pane{
-      display:none;
-    }
-    .tab-pane.active{
-      display:block;
-    }
+    <style>
+        /* Tabs pill modernos, sin línea inferior */
+        .nav-tabs-custom {
+            border-bottom: none !important;
+            display: flex;
+            gap: .4rem;
+            flex-wrap: wrap;
+        }
 
-    /* Título principal */
-    .app-title{
-      font-size:1.35rem;
-      font-weight:700;
-      margin:0;
-    }
+        .nav-tabs-custom .nav-link {
+            border-radius: 999px;
+            padding: .35rem .9rem;
+            font-weight: 600;
+            color: var(--muted);
+            border: none;
+            background: transparent;
+        }
 
-    /* Tabla moderna */
-    .table-modern thead th{
-      font-size:.8rem;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      border-bottom:1px solid var(--border);
-      background:#f9fafb;
-      color:#4b5563;
-    }
-    body.dark-mode .table-modern thead th{
-      background:#111827;
-      color:#e5e7eb;
-      border-color:#27272f;
-    }
-    .table-modern tbody tr:hover{
-      background:rgba(0,0,0,0.02);
-    }
-    body.dark-mode .table-modern tbody tr:hover{
-      background:rgba(255,255,255,0.03);
-    }
+        .nav-tabs-custom .nav-link:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
 
-    /* Icono de calendario visible en dark */
-    input[type="date"]::-webkit-calendar-picker-indicator{
-      cursor:pointer;
-    }
-    body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator{
-      filter:invert(1);
-    }
-  </style>
+        .nav-tabs-custom .nav-link.active {
+            background: var(--brand);
+            color: #fff;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Título principal */
+        .app-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Tabla moderna */
+        .table-modern thead th {
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            border-bottom: 1px solid var(--border);
+            background: #f9fafb;
+            color: #4b5563;
+        }
+
+        body.dark-mode .table-modern thead th {
+            background: #111827;
+            color: #e5e7eb;
+            border-color: #27272f;
+        }
+
+        .table-modern tbody tr:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        body.dark-mode .table-modern tbody tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* Icono de calendario visible en dark */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
+
+        body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+    </style>
 </head>
+
 <body>
-  <!-- Loader global -->
-  <div id="globalLoader" class="loader-overlay d-none">
-    <div class="spinner-border loader-spinner" role="status">
-      <span class="visually-hidden">Cargando...</span>
-    </div>
-  </div>
-
-  <!-- Header -->
-  <header class="py-3">
-    <div class="container-narrow d-flex justify-content-between align-items-center">
-      <h1 class="app-title">Gestión de gastos</h1>
-      <div class="d-flex align-items-center gap-2">
-        <button id="themeToggle" class="btn btn-outline-secondary btn-sm" aria-label="Cambiar tema">
-          <i class="fa-solid fa-moon"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Tabs -->
-  <main class="container-narrow">
-    <div class="card-surface p-3 p-md-4">
-      <ul class="nav nav-tabs-custom mb-3">
-        <li class="nav-item">
-          <button class="nav-link" id="tab-btn-search" data-tab="search" type="button">
-            <i class="fa-solid fa-list-ul me-1"></i> Consultar
-          </button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" id="tab-btn-save" data-tab="save" type="button">
-            <i class="fa-solid fa-plus me-1"></i> Nuevo
-          </button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" id="tab-btn-update" data-tab="update" type="button">
-            <i class="fa-solid fa-pen-to-square me-1"></i> Modificar
-          </button>
-        </li>
-      </ul>
-
-      <!-- TAB: BUSCAR -->
-      <section id="tab-search" class="tab-pane">
-        <!-- Filtros -->
-        <form id="filtersForm" class="row g-3">
-          <div class="col-12 col-md-4">
-            <label class="form-label">Buscar</label>
-            <input id="whatEverText" class="form-control" placeholder="Categoría, comentarios o fuente" autocomplete="off" />
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Desde</label>
-            <input id="from" type="date" class="form-control" />
-          </div>
-          <div class="col-6 col-md-3">
-            <label class="form-label">Hasta</label>
-            <input id="to" type="date" class="form-control" />
-          </div>
-          <div class="col-12 col-md-2">
-            <label for="categoryInputSearch" class="form-label">Categoría</label>
-            <input id="categoryInputSearch" list="categoryOptions" class="form-control" placeholder="Todas" autocomplete="off" />
-          </div>
-          <div class="col-12 d-flex gap-2">
-            <button type="submit" class="btn btn-brand">
-              <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
-            </button>
-            <button type="button" id="clearBtn" class="btn btn-outline-secondary">
-              <i class="fa-solid fa-eraser me-2"></i> Limpiar
-            </button>
-          </div>
-        </form>
-
-        <!-- Resultados -->
-        <div class="table-responsive mt-4">
-          <table class="table table-sm table-hover table-borderless align-middle table-modern">
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Importe</th>
-                <th>Mon.</th>
-                <th>Categoría</th>
-                <th>Comentarios</th>
-                <th>Origen</th>
-                <th style="width:1%">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
-          </table>
+    <!-- Loader global -->
+    <div id="globalLoader" class="loader-overlay d-none">
+        <div class="spinner-border loader-spinner" role="status">
+            <span class="visually-hidden">Cargando...</span>
         </div>
-
-        <!-- Paginación -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
-          <div class="text-muted">
-            <span id="pageInfo">—</span>
-          </div>
-          <div class="btn-group">
-            <button id="prevBtn" class="btn btn-outline-secondary btn-sm" disabled>
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button id="nextBtn" class="btn btn-outline-secondary btn-sm" disabled>
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB: NUEVO -->
-      <section id="tab-save" class="tab-pane">
-        <form id="new-expense-form" novalidate class="needs-validation">
-          <div class="row g-3">
-
-            <!-- Amount (required) -->
-            <div class="col-12 col-md-4">
-              <label for="amountInputSave" class="form-label">Importe <span class="text-danger">*</span></label>
-              <input
-                id="amountInputSave"
-                name="amount"
-                class="form-control"
-                inputmode="decimal"
-                placeholder="Ej: 125.50"
-                autocomplete="off"
-                required
-              />
-              <div class="invalid-feedback">Ingrese un importe válido.</div>
-            </div>
-
-            <!-- Category (required) -->
-            <div class="col-12 col-md-4">
-              <label for="categoryInputSave" class="form-label">Categoría <span class="text-danger">*</span></label>
-              <input
-                id="categoryInputSave"
-                name="category"
-                list="categoryOptions"
-                placeholder="Seleccione una categoría"
-                class="form-control"
-                required
-                autocomplete="off"
-              />
-              <div class="invalid-feedback">La categoría es obligatoria.</div>
-            </div>
-
-            <!-- Date (required) -->
-            <div class="col-12 col-md-4">
-              <label for="dateInputSave" class="form-label">Fecha <span class="text-danger">*</span></label>
-              <input
-                id="dateInputSave"
-                name="expenseDate"
-                type="date"
-                class="form-control"
-                required
-                value="<?= defaultDate ?>"
-              />
-              <div class="invalid-feedback">Seleccione una fecha válida.</div>
-            </div>
-
-            <!-- Comments (optional) -->
-            <div class="col-12 col-md-8">
-              <label for="commentsSave" class="form-label">Comentario</label>
-              <input
-                id="commentsSave"
-                name="comments"
-                class="form-control"
-                placeholder="Escriba un comentario"
-                autocomplete="off"
-              />
-            </div>
-          </div>
-
-          <div class="d-flex gap-2 mt-4">
-            <button id="saveBtn" type="submit" class="btn btn-brand flex-grow-1" disabled>
-              <i class="fa-solid fa-plus me-2"></i>Guardar
-            </button>
-            <button type="button" id="resetBtnSave" class="btn btn-outline-secondary">
-              <i class="fa-solid fa-rotate-left me-2"></i>Reset
-            </button>
-          </div>
-
-          <div id="statusAreaSave" class="visually-hidden" aria-live="polite"></div>
-        </form>
-      </section>
-
-      <!-- TAB: MODIFICAR -->
-      <section id="tab-update" class="tab-pane">
-        <!-- Summary -->
-        <ul class="summary mb-3">
-          <li class="item">
-            <span class="label">Fecha</span>
-            <span class="value" id="summaryDate"></span>
-          </li>
-          <li class="item">
-            <span class="label">Origen</span>
-            <span class="value" id="summarySource"></span>
-          </li>
-          <li class="item">
-            <span class="label">ID</span>
-            <span class="value text-truncate" id="summaryId" title=""></span>
-          </li>
-        </ul>
-
-        <!-- Form -->
-        <form id="expense-form" novalidate class="needs-validation">
-          <input type="hidden" id="gmailMessageIdUpdate" name="gmailMessageId">
-
-          <div class="row g-3">
-            <!-- Amount -->
-            <div class="col-12 col-md-4">
-              <label for="amountInputUpdate" class="form-label">Importe</label>
-              <input
-                id="amountInputUpdate"
-                name="amount"
-                class="form-control"
-                inputmode="decimal"
-                placeholder="Ej: 125.50"
-                autocomplete="off"
-              />
-              <div class="invalid-feedback">Ingrese un importe válido.</div>
-            </div>
-
-            <!-- Category -->
-            <div class="col-12 col-md-4">
-              <label for="categoryInputUpdate" class="form-label">Categoría <span class="text-danger">*</span></label>
-              <input
-                id="categoryInputUpdate"
-                name="category"
-                list="categoryOptions"
-                placeholder="Seleccione o escriba la categoría"
-                class="form-control"
-                required
-                autocomplete="off"
-              />
-              <div class="invalid-feedback">La categoría es obligatoria.</div>
-            </div>
-
-            <!-- Comments -->
-            <div class="col-12 col-md-4">
-              <label for="commentsUpdate" class="form-label">Comentario</label>
-              <input
-                id="commentsUpdate"
-                name="comments"
-                class="form-control"
-                placeholder="Escriba un comentario"
-                autocomplete="off"
-              />
-            </div>
-          </div>
-
-          <div class="d-flex gap-2 mt-4">
-            <button id="saveBtnUpdate" type="submit" class="btn btn-brand flex-grow-1" disabled>
-              <i class="fa-solid fa-floppy-disk me-2"></i>Guardar
-            </button>
-            <button type="button" id="resetBtnUpdate" class="btn btn-outline-secondary">
-              <i class="fa-solid fa-rotate-left me-2"></i>Reset
-            </button>
-          </div>
-
-          <div id="statusAreaUpdate" class="visually-hidden" aria-live="polite"></div>
-        </form>
-      </section>
-
-      <!-- Datalist compartido -->
-      <datalist id="categoryOptions">
-        <? for (var i = 0; i < categories.length; i++) { ?>
-          <option value="<?= categories[i] ?>"></option>
-        <? } ?>
-      </datalist>
-
     </div>
-  </main>
 
-  <!-- Toasts host -->
-  <div id="toastHost" class="toast-container"></div>
+    <!-- Header -->
+    <header class="py-3">
+        <div class="container-narrow d-flex justify-content-between align-items-center">
+            <h1 class="app-title">Gestión de gastos</h1>
+            <div class="d-flex align-items-center gap-2">
+                <button id="themeToggle" class="btn btn-outline-secondary btn-sm" aria-label="Cambiar tema">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    <!-- Tabs -->
+    <main class="container-narrow">
+        <div class="card-surface p-3 p-md-4">
+            <ul class="nav nav-tabs-custom mb-3">
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-btn-search" data-tab="search" type="button">
+                        <i class="fa-solid fa-list-ul me-1"></i> Consultar
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-btn-save" data-tab="save" type="button">
+                        <i class="fa-solid fa-plus me-1"></i> Nuevo
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="tab-btn-update" data-tab="update" type="button">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> Modificar
+                    </button>
+                </li>
+            </ul>
 
-  <!-- App JS -->
-  <script>
-    (function(){
-      // ===== Vars del backend
-      var initialTab = "<?= initialTab || 'search' ?>";
-      if (!['save','search','update'].includes(initialTab)) initialTab = 'search';
+            <!-- TAB: BUSCAR -->
+            <section id="tab-search" class="tab-pane">
+                <!-- Filtros -->
+                <form id="filtersForm" class="row g-3">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Buscar</label>
+                        <input id="whatEverText" class="form-control" placeholder="Categoría, comentarios o fuente"
+                            autocomplete="off" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label">Desde</label>
+                        <input id="from" type="date" class="form-control" />
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label">Hasta</label>
+                        <input id="to" type="date" class="form-control" />
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <label for="categoryInputSearch" class="form-label">Categoría</label>
+                        <input id="categoryInputSearch" list="categoryOptions" class="form-control" placeholder="Todas"
+                            autocomplete="off" />
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button type="submit" class="btn btn-brand">
+                            <i class="fa-solid fa-magnifying-glass me-2"></i> Buscar
+                        </button>
+                        <button type="button" id="clearBtn" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-eraser me-2"></i> Limpiar
+                        </button>
+                    </div>
+                </form>
 
-      var initialUpdate = {
-        gmailMessageId: "<?= gmailMessageId || '' ?>",
-        amount: "<?= amount || '' ?>",
-        expenseDate: "<?= expenseDate || '' ?>",
-        source: "<?= source || '' ?>",
-        comments: "<?= comments || '' ?>",
-        category: "<?= category || '' ?>"
-      };
+                <!-- Resultados -->
+                <div class="table-responsive mt-4">
+                    <table class="table table-sm table-hover table-borderless align-middle table-modern">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Importe</th>
+                                <th>Mon.</th>
+                                <th>Categoría</th>
+                                <th>Comentarios</th>
+                                <th>Origen</th>
+                                <th style="width:1%">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rows"></tbody>
+                    </table>
+                </div>
 
-      // ===== Helpers
-      var $ = function(id){ return document.getElementById(id); };
-      var loader = $('globalLoader');
-      function showLoader(show){ loader.classList.toggle('d-none', !show); }
+                <!-- Paginación -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted">
+                        <span id="pageInfo">—</span>
+                    </div>
+                    <div class="btn-group">
+                        <button id="prevBtn" class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button id="nextBtn" class="btn btn-outline-secondary btn-sm" disabled>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
 
-      function setBusy(btn, busy){
-        if (!btn) return;
-        btn.disabled = busy;
-        btn.setAttribute('aria-busy', busy ? 'true' : 'false');
-      }
+            <!-- TAB: NUEVO -->
+            <section id="tab-save" class="tab-pane">
+                <form id="new-expense-form" novalidate class="needs-validation">
+                    <div class="row g-3">
 
-      function toast(msg, ok){
-        var host = $('toastHost');
-        var el = document.createElement('div');
-        el.className = 'toast align-items-center text-bg-' + (ok ? 'success' : 'danger') + ' border-0';
-        el.innerHTML = '<div class="d-flex"><div class="toast-body">'+ msg +'</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>';
-        host.appendChild(el);
-        var t = new bootstrap.Toast(el, { delay: 3500 });
-        t.show();
-        el.addEventListener('hidden.bs.toast', function(){ el.remove(); });
-      }
+                        <!-- Amount (required) -->
+                        <div class="col-12 col-md-4">
+                            <label for="amountInputSave" class="form-label">Importe <span
+                                    class="text-danger">*</span></label>
+                            <input id="amountInputSave" name="amount" class="form-control" inputmode="decimal"
+                                placeholder="Ej: 125.50" autocomplete="off" required />
+                            <div class="invalid-feedback">Ingrese un importe válido.</div>
+                        </div>
 
-      // ===== Theme toggle
-      var themeBtn = $('themeToggle');
-      function applyTheme(mode){
-        document.body.classList.toggle('dark-mode', mode === 'dark');
-        themeBtn.innerHTML = '<i class="fa-solid ' + (mode === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i>';
-      }
-      var saved = localStorage.getItem('dex_theme');
-      applyTheme(saved || 'light');
-      themeBtn.addEventListener('click', function(){
-        var mode = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
-        localStorage.setItem('dex_theme', mode);
-        applyTheme(mode);
-      });
+                        <!-- Category (required) -->
+                        <div class="col-12 col-md-4">
+                            <label for="categoryInputSave" class="form-label">Categoría <span
+                                    class="text-danger">*</span></label>
+                            <input id="categoryInputSave" name="category" list="categoryOptions"
+                                placeholder="Seleccione una categoría" class="form-control" required
+                                autocomplete="off" />
+                            <div class="invalid-feedback">La categoría es obligatoria.</div>
+                        </div>
 
-      // ===== Tabs
-      function setActiveTab(tab){
-        ['search','save','update'].forEach(function(t){
-          var pane = $('tab-' + t);
-          var btn = $('tab-btn-' + t);
-          if (pane){ pane.classList.toggle('active', t === tab); }
-          if (btn){ btn.classList.toggle('active', t === tab); }
-        });
-      }
+                        <!-- Date (required) -->
+                        <div class="col-12 col-md-4">
+                            <label for="dateInputSave" class="form-label">Fecha <span
+                                    class="text-danger">*</span></label>
+                            <input id="dateInputSave" name="expenseDate" type="date" class="form-control" required
+                                value="<?= defaultDate ?>" />
+                            <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        </div>
 
-      ['search','save','update'].forEach(function(t){
-        var btn = $('tab-btn-' + t);
-        if (!btn) return;
-        btn.addEventListener('click', function(){
-          setActiveTab(t);
-        });
-      });
+                        <!-- Comments (optional) -->
+                        <div class="col-12 col-md-8">
+                            <label for="commentsSave" class="form-label">Comentario</label>
+                            <input id="commentsSave" name="comments" class="form-control"
+                                placeholder="Escriba un comentario" autocomplete="off" />
+                        </div>
+                    </div>
 
-      // ====== Módulo: NUEVO (SAVE)
-      (function initSaveTab(){
-        var form = $('new-expense-form');
-        var saveBtn = $('saveBtn');
-        var resetBtn = $('resetBtnSave');
-        var amountInput = $('amountInputSave');
-        var categoryInput = $('categoryInputSave');
-        var dateInput = $('dateInputSave');
-        var commentsInput = $('commentsSave');
-        var statusArea = $('statusAreaSave');
+                    <div class="d-flex gap-2 mt-4">
+                        <button id="saveBtn" type="submit" class="btn btn-brand flex-grow-1" disabled>
+                            <i class="fa-solid fa-plus me-2"></i>Guardar
+                        </button>
+                        <button type="button" id="resetBtnSave" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-rotate-left me-2"></i>Reset
+                        </button>
+                    </div>
 
-        function numeric(v){ var n = Number(String(v).replace(',', '.')); return !isNaN(n); }
+                    <div id="statusAreaSave" class="visually-hidden" aria-live="polite"></div>
+                </form>
+            </section>
 
-        function validate(){
-          var okAmount = amountInput.value.trim().length > 0 && numeric(amountInput.value.trim());
-          var okCategory = categoryInput.value.trim().length > 0;
-          var okDate = dateInput.value && /^\d{4}-\d{2}-\d{2}$/.test(dateInput.value);
-          amountInput.classList.toggle('is-invalid', !okAmount);
-          categoryInput.classList.toggle('is-invalid', !okCategory);
-          dateInput.classList.toggle('is-invalid', !okDate);
+            <!-- TAB: MODIFICAR -->
+            <section id="tab-update" class="tab-pane">
+                <!-- Summary -->
+                <ul class="summary mb-3">
+                    <li class="item">
+                        <span class="label">Fecha</span>
+                        <span class="value" id="summaryDate"></span>
+                    </li>
+                    <li class="item">
+                        <span class="label">Origen</span>
+                        <span class="value" id="summarySource"></span>
+                    </li>
+                    <li class="item">
+                        <span class="label">ID</span>
+                        <span class="value text-truncate" id="summaryId" title=""></span>
+                    </li>
+                </ul>
 
-          var valid = okAmount && okCategory && okDate;
-          saveBtn.disabled = !valid;
-          return valid;
-        }
-        ['input','change'].forEach(function(evt){
-          amountInput.addEventListener(evt, validate);
-          categoryInput.addEventListener(evt, validate);
-          dateInput.addEventListener(evt, validate);
-        });
+                <!-- Form -->
+                <form id="expense-form" novalidate class="needs-validation">
+                    <input type="hidden" id="gmailMessageIdUpdate" name="gmailMessageId">
 
-        resetBtn.addEventListener('click', function(){
-          amountInput.value = '';
-          categoryInput.value = '';
-          commentsInput.value = '';
-          dateInput.value = "<?= defaultDate ?>";
-          validate();
-        });
+                    <div class="row g-3">
+                        <!-- Amount -->
+                        <div class="col-12 col-md-4">
+                            <label for="amountInputUpdate" class="form-label">Importe</label>
+                            <input id="amountInputUpdate" name="amount" class="form-control" inputmode="decimal"
+                                placeholder="Ej: 125.50" autocomplete="off" />
+                            <div class="invalid-feedback">Ingrese un importe válido.</div>
+                        </div>
 
-        form.addEventListener('submit', function(e){
-          e.preventDefault();
-          if (!validate()) return;
+                        <!-- Category -->
+                        <div class="col-12 col-md-4">
+                            <label for="categoryInputUpdate" class="form-label">Categoría <span
+                                    class="text-danger">*</span></label>
+                            <input id="categoryInputUpdate" name="category" list="categoryOptions"
+                                placeholder="Seleccione o escriba la categoría" class="form-control" required
+                                autocomplete="off" />
+                            <div class="invalid-feedback">La categoría es obligatoria.</div>
+                        </div>
 
-          var payload = {
-            amount: amountInput.value.trim(),
-            category: categoryInput.value.trim(),
-            comments: commentsInput.value.trim(),
-            expenseDate: dateInput.value
-          };
+                        <!-- Comments -->
+                        <div class="col-12 col-md-4">
+                            <label for="commentsUpdate" class="form-label">Comentario</label>
+                            <input id="commentsUpdate" name="comments" class="form-control"
+                                placeholder="Escriba un comentario" autocomplete="off" />
+                        </div>
+                    </div>
 
-          statusArea.textContent = 'Guardando…';
-          setBusy(saveBtn, true);
-          showLoader(true);
+                    <div class="d-flex gap-2 mt-4">
+                        <button id="saveBtnUpdate" type="submit" class="btn btn-brand flex-grow-1" disabled>
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Guardar
+                        </button>
+                        <button type="button" id="resetBtnUpdate" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-rotate-left me-2"></i>Reset
+                        </button>
+                    </div>
 
-          google.script.run
-            .withSuccessHandler(function(uuid){
-              setBusy(saveBtn, false);
-              showLoader(false);
-              statusArea.textContent = 'Guardado correctamente.';
-              toast('Gasto registrado con éxito. ID: ' + uuid, true);
-              resetBtn.click();
-            })
-            .withFailureHandler(function(err){
-              setBusy(saveBtn, false);
-              showLoader(false);
-              statusArea.textContent = 'Error al guardar.';
-              var msg = (err && err.message) ? err.message : 'No se pudo guardar.';
-              toast(msg, false);
-            })
-            .saveExpense(payload);
-        });
+                    <div id="statusAreaUpdate" class="visually-hidden" aria-live="polite"></div>
+                </form>
+            </section>
 
-        validate();
-      })();
+            <!-- Datalist compartido -->
+            <datalist id="categoryOptions">
+                <? for (var i = 0; i < categories.length; i++) { ?>
+                <option value="<?= categories[i] ?>"></option>
+                <? } ?>
+            </datalist>
 
-      // ====== Módulo: MODIFICAR (UPDATE)
-      (function initUpdateTab(){
-        var form = $('expense-form');
-        var saveBtn = $('saveBtnUpdate');
-        var resetBtn = $('resetBtnUpdate');
-        var amountInput = $('amountInputUpdate');
-        var categoryInput = $('categoryInputUpdate');
-        var commentsInput = $('commentsUpdate');
-        var statusArea = $('statusAreaUpdate');
-        var gmailInput = $('gmailMessageIdUpdate');
+        </div>
+    </main>
 
-        var sumDate = $('summaryDate');
-        var sumSource = $('summarySource');
-        var sumId = $('summaryId');
+    <!-- Toasts host -->
+    <div id="toastHost" class="toast-container"></div>
 
-        function numericOrEmpty(v){
-          if (!v) return true;
-          var n = Number(String(v).replace(',', '.'));
-          return !isNaN(n);
-        }
+    <!-- Modal de éxito -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4 border-0">
+                <div class="mb-3">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle"
+                        style="width:64px;height:64px;background:rgba(34,197,94,0.1);">
+                        <i class="fa-solid fa-check fa-2x text-success"></i>
+                    </div>
+                </div>
+                <h5 class="mb-2">Operación exitosa</h5>
+                <p class="mb-0 text-muted" id="successModalMessage"></p>
+                <button type="button" class="btn btn-brand mt-3" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
 
-        function validate(){
-          var validCategory = categoryInput.value.trim().length > 0;
-          var validAmount = numericOrEmpty(amountInput.value.trim());
-          if (!validAmount){
-            amountInput.classList.add('is-invalid');
-          } else {
-            amountInput.classList.remove('is-invalid');
-          }
-          saveBtn.disabled = !(validCategory && validAmount);
-          return !saveBtn.disabled;
-        }
-        categoryInput.addEventListener('input', validate);
-        amountInput.addEventListener('input', validate);
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
-        function fillUpdateFields(data){
-          gmailInput.value = data.gmailMessageId || '';
-          amountInput.value = data.amount != null ? String(data.amount) : '';
-          categoryInput.value = data.category || '';
-          commentsInput.value = data.comments || '';
-          sumDate.textContent = data.expenseDate || '';
-          sumSource.textContent = data.source || '';
-          sumId.textContent = data.gmailMessageId || '—';
-          sumId.title = data.gmailMessageId || '';
-          validate();
-        }
+    <!-- App JS -->
+    <script>
+        (function () {
+            // ===== Vars del backend
+            var initialTab = "<?= initialTab || 'search' ?>";
+            if (!['save', 'search', 'update'].includes(initialTab)) initialTab = 'search';
 
-        // Datos originales (para Reset)
-        var originalUpdateData = {
-          gmailMessageId: initialUpdate.gmailMessageId || '',
-          amount: initialUpdate.amount || '',
-          expenseDate: initialUpdate.expenseDate || '',
-          source: initialUpdate.source || '',
-          comments: initialUpdate.comments || '',
-          category: initialUpdate.category || ''
-        };
+            var initialUpdate = {
+                gmailMessageId: "<?= gmailMessageId || '' ?>",
+                amount: "<?= amount || '' ?>",
+                expenseDate: "<?= expenseDate || '' ?>",
+                source: "<?= source || '' ?>",
+                comments: "<?= comments || '' ?>",
+                category: "<?= category || '' ?>"
+            };
 
-        // Inicializar al cargar
-        if (originalUpdateData.gmailMessageId){
-          fillUpdateFields(originalUpdateData);
-        } else {
-          fillUpdateFields({
-            gmailMessageId:'',
-            amount:'',
-            expenseDate:'',
-            source:'',
-            comments:'',
-            category:''
-          });
-        }
+            // ===== Helpers
+            var $ = function (id) { return document.getElementById(id); };
+            var loader = $('globalLoader');
+            function showLoader(show) { loader.classList.toggle('d-none', !show); }
 
-        resetBtn.addEventListener('click', function(){
-          fillUpdateFields(originalUpdateData);
-        });
-
-        form.addEventListener('submit', function(e){
-          e.preventDefault();
-          if (!validate()) return;
-
-          var payload = {
-            gmailMessageId: gmailInput.value,
-            category: categoryInput.value.trim(),
-            comments: commentsInput.value.trim(),
-            amount: amountInput.value.trim()
-          };
-
-          if (!payload.gmailMessageId){
-            toast('No hay un ID de gasto para actualizar.', false);
-            return;
-          }
-
-          statusArea.textContent = 'Guardando…';
-          setBusy(saveBtn, true);
-          showLoader(true);
-
-          google.script.run
-            .withSuccessHandler(function(){
-              setBusy(saveBtn, false);
-              showLoader(false);
-              statusArea.textContent = 'Actualizado correctamente.';
-              toast('Actualizado con éxito.', true);
-            })
-            .withFailureHandler(function(err){
-              setBusy(saveBtn, false);
-              showLoader(false);
-              statusArea.textContent = 'Error al guardar.';
-              var msg = (err && err.message) ? err.message : 'No se pudo actualizar.';
-              toast(msg, false);
-            })
-            .updateExpense(payload);
-        });
-
-        // Exponer helper para el tab de búsqueda
-        window.__setUpdateDataFromSearch = function(item){
-          originalUpdateData = {
-            gmailMessageId: item.gmailMessageId || '',
-            amount: item.amount != null ? String(item.amount) : '',
-            expenseDate: item.expenseDate || '',
-            source: item.source || '',
-            comments: item.comments || '',
-            category: item.category || ''
-          };
-          fillUpdateFields(originalUpdateData);
-          setActiveTab('update');
-        };
-
-        validate();
-      })();
-
-      // ====== Módulo: BUSCAR (SEARCH)
-      (function initSearchTab(){
-        var state = {
-          page: 1,
-          pageSize: 10, // máximo 10 por página
-          total: 0,
-          totalPages: 0,
-          filters: { whatEverText:'', from:'', to:'', category:'' }
-        };
-
-        var rows = $('rows');
-        var pageInfo = $('pageInfo');
-        var prevBtn = $('prevBtn');
-        var nextBtn = $('nextBtn');
-        var form = $('filtersForm');
-        var whatEverText = $('whatEverText');
-        var from = $('from');
-        var to = $('to');
-        var categoryInput = $('categoryInputSearch');
-        var clearBtn = $('clearBtn');
-
-        function updatePager(){
-          pageInfo.textContent = (state.totalPages > 0)
-            ? 'Página ' + state.page + ' de ' + state.totalPages + ' · ' + state.total + ' registros'
-            : '—';
-          prevBtn.disabled = state.page <= 1;
-          nextBtn.disabled = state.page >= state.totalPages;
-        }
-
-        function render(items){
-          rows.innerHTML = '';
-          if (!items || !items.length){
-            rows.innerHTML = '<tr><td colspan="7" class="text-muted">Sin resultados.</td></tr>';
-            return;
-          }
-          items.forEach(function(it){
-            var fullComment = it.comments || '';
-            var displayComment = fullComment;
-            if (displayComment.length > 30){
-              displayComment = displayComment.slice(0, 30) + '…';
+            function setBusy(btn, busy) {
+                if (!btn) return;
+                btn.disabled = busy;
+                btn.setAttribute('aria-busy', busy ? 'true' : 'false');
             }
 
-            var payload = JSON.stringify(it)
-              .replace(/"/g, '&quot;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;');
+            function formatDateTime(str) {
+                if (!str) return '';
+                var d = new Date(str);
+                if (isNaN(d.getTime())) return str; // si no parsea, devolvemos tal cual
+                function pad(n) { return n < 10 ? '0' + n : '' + n; }
+                var day = pad(d.getDate());
+                var month = pad(d.getMonth() + 1);
+                var year = d.getFullYear();
+                var hour = pad(d.getHours());
+                var mins = pad(d.getMinutes());
+                return day + '/' + month + '/' + year + ' ' + hour + ':' + mins;
+            }
 
-            var tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${it.expenseDate ?? ''}</td>
+            function toast(msg, ok) {
+                var host = $('toastHost');
+                var el = document.createElement('div');
+                el.className = 'toast align-items-center text-bg-' + (ok ? 'success' : 'danger') + ' border-0';
+                el.innerHTML = '<div class="d-flex"><div class="toast-body">' + msg + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div>';
+                host.appendChild(el);
+                var t = new bootstrap.Toast(el, { delay: 3500 });
+                t.show();
+                el.addEventListener('hidden.bs.toast', function () { el.remove(); });
+            }
+
+            // Modal de éxito (centrado)
+            var successModalInstance = null;
+            var successModalMsgEl = null;
+            function initSuccessModal() {
+                var el = document.getElementById('successModal');
+                successModalMsgEl = document.getElementById('successModalMessage');
+                if (el && window.bootstrap) {
+                    successModalInstance = new bootstrap.Modal(el);
+                }
+            }
+            function showSuccessModal(message) {
+                if (!successModalInstance) initSuccessModal();
+                if (successModalMsgEl) {
+                    successModalMsgEl.textContent = message || 'Operación realizada correctamente.';
+                }
+                if (successModalInstance) {
+                    successModalInstance.show();
+                } else {
+                    // fallback: toast si algo falla con el modal
+                    toast(message || 'Operación realizada correctamente.', true);
+                }
+            }
+
+            // ===== Theme toggle
+            var themeBtn = $('themeToggle');
+            function applyTheme(mode) {
+                document.body.classList.toggle('dark-mode', mode === 'dark');
+                themeBtn.innerHTML = '<i class="fa-solid ' + (mode === 'dark' ? 'fa-sun' : 'fa-moon') + '"></i>';
+            }
+            var saved = localStorage.getItem('dex_theme');
+            applyTheme(saved || 'light');
+            themeBtn.addEventListener('click', function () {
+                var mode = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+                localStorage.setItem('dex_theme', mode);
+                applyTheme(mode);
+            });
+
+            // ===== Tabs
+            function setActiveTab(tab) {
+                ['search', 'save', 'update'].forEach(function (t) {
+                    var pane = $('tab-' + t);
+                    var btn = $('tab-btn-' + t);
+                    if (pane) { pane.classList.toggle('active', t === tab); }
+                    if (btn) { btn.classList.toggle('active', t === tab); }
+                });
+            }
+
+            ['search', 'save', 'update'].forEach(function (t) {
+                var btn = $('tab-btn-' + t);
+                if (!btn) return;
+                btn.addEventListener('click', function () {
+                    setActiveTab(t);
+                });
+            });
+
+            // ====== Módulo: NUEVO (SAVE)
+            (function initSaveTab() {
+                var form = $('new-expense-form');
+                var saveBtn = $('saveBtn');
+                var resetBtn = $('resetBtnSave');
+                var amountInput = $('amountInputSave');
+                var categoryInput = $('categoryInputSave');
+                var dateInput = $('dateInputSave');
+                var commentsInput = $('commentsSave');
+                var statusArea = $('statusAreaSave');
+
+                function numeric(v) { var n = Number(String(v).replace(',', '.')); return !isNaN(n); }
+
+                function validate() {
+                    var okAmount = amountInput.value.trim().length > 0 && numeric(amountInput.value.trim());
+                    var okCategory = categoryInput.value.trim().length > 0;
+                    var okDate = dateInput.value && /^\d{4}-\d{2}-\d{2}$/.test(dateInput.value);
+                    amountInput.classList.toggle('is-invalid', !okAmount);
+                    categoryInput.classList.toggle('is-invalid', !okCategory);
+                    dateInput.classList.toggle('is-invalid', !okDate);
+
+                    var valid = okAmount && okCategory && okDate;
+                    saveBtn.disabled = !valid;
+                    return valid;
+                }
+                ['input', 'change'].forEach(function (evt) {
+                    amountInput.addEventListener(evt, validate);
+                    categoryInput.addEventListener(evt, validate);
+                    dateInput.addEventListener(evt, validate);
+                });
+
+                resetBtn.addEventListener('click', function () {
+                    amountInput.value = '';
+                    categoryInput.value = '';
+                    commentsInput.value = '';
+                    dateInput.value = "<?= defaultDate ?>";
+                    validate();
+                });
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (!validate()) return;
+
+                    var payload = {
+                        amount: amountInput.value.trim(),
+                        category: categoryInput.value.trim(),
+                        comments: commentsInput.value.trim(),
+                        expenseDate: dateInput.value
+                    };
+
+                    statusArea.textContent = 'Guardando…';
+                    setBusy(saveBtn, true);
+                    showLoader(true);
+
+                    google.script.run
+                        .withSuccessHandler(function (uuid) {
+                            setBusy(saveBtn, false);
+                            showLoader(false);
+                            statusArea.textContent = 'Guardado correctamente.';
+                            showSuccessModal('Gasto registrado con éxito. ID: ' + uuid);
+                            resetBtn.click();
+
+                            // refrescar lista de consulta si está disponible
+                            if (window.__refreshSearch) {
+                                window.__refreshSearch();
+                            }
+                        })
+                        .withFailureHandler(function (err) {
+                            setBusy(saveBtn, false);
+                            showLoader(false);
+                            statusArea.textContent = 'Error al guardar.';
+                            var msg = (err && err.message) ? err.message : 'No se pudo guardar.';
+                            toast(msg, false);
+                        })
+                        .saveExpense(payload);
+                });
+
+                validate();
+            })();
+
+            // ====== Módulo: MODIFICAR (UPDATE)
+            (function initUpdateTab() {
+                var form = $('expense-form');
+                var saveBtn = $('saveBtnUpdate');
+                var resetBtn = $('resetBtnUpdate');
+                var amountInput = $('amountInputUpdate');
+                var categoryInput = $('categoryInputUpdate');
+                var commentsInput = $('commentsUpdate');
+                var statusArea = $('statusAreaUpdate');
+                var gmailInput = $('gmailMessageIdUpdate');
+
+                var sumDate = $('summaryDate');
+                var sumSource = $('summarySource');
+                var sumId = $('summaryId');
+
+                function numericOrEmpty(v) {
+                    if (!v) return true;
+                    var n = Number(String(v).replace(',', '.'));
+                    return !isNaN(n);
+                }
+
+                function validate() {
+                    var validCategory = categoryInput.value.trim().length > 0;
+                    var validAmount = numericOrEmpty(amountInput.value.trim());
+                    if (!validAmount) {
+                        amountInput.classList.add('is-invalid');
+                    } else {
+                        amountInput.classList.remove('is-invalid');
+                    }
+                    saveBtn.disabled = !(validCategory && validAmount);
+                    return !saveBtn.disabled;
+                }
+                categoryInput.addEventListener('input', validate);
+                amountInput.addEventListener('input', validate);
+
+                function fillUpdateFields(data) {
+                    gmailInput.value = data.gmailMessageId || '';
+                    amountInput.value = data.amount != null ? String(data.amount) : '';
+                    categoryInput.value = data.category || '';
+                    commentsInput.value = data.comments || '';
+                    sumDate.textContent = formatDateTime(data.expenseDate || '');
+                    sumSource.textContent = data.source || '';
+                    sumId.textContent = data.gmailMessageId || '—';
+                    sumId.title = data.gmailMessageId || '';
+                    validate();
+                }
+
+                // Datos originales (para Reset)
+                var originalUpdateData = {
+                    gmailMessageId: initialUpdate.gmailMessageId || '',
+                    amount: initialUpdate.amount || '',
+                    expenseDate: initialUpdate.expenseDate || '',
+                    source: initialUpdate.source || '',
+                    comments: initialUpdate.comments || '',
+                    category: initialUpdate.category || ''
+                };
+
+                // Inicializar al cargar
+                if (originalUpdateData.gmailMessageId) {
+                    fillUpdateFields(originalUpdateData);
+                } else {
+                    fillUpdateFields({
+                        gmailMessageId: '',
+                        amount: '',
+                        expenseDate: '',
+                        source: '',
+                        comments: '',
+                        category: ''
+                    });
+                }
+
+                resetBtn.addEventListener('click', function () {
+                    fillUpdateFields(originalUpdateData);
+                });
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    if (!validate()) return;
+
+                    var payload = {
+                        gmailMessageId: gmailInput.value,
+                        category: categoryInput.value.trim(),
+                        comments: commentsInput.value.trim(),
+                        amount: amountInput.value.trim()
+                    };
+
+                    if (!payload.gmailMessageId) {
+                        toast('No hay un ID de gasto para actualizar.', false);
+                        return;
+                    }
+
+                    statusArea.textContent = 'Guardando…';
+                    setBusy(saveBtn, true);
+                    showLoader(true);
+
+                    google.script.run
+                        .withSuccessHandler(function () {
+                            setBusy(saveBtn, false);
+                            showLoader(false);
+                            statusArea.textContent = 'Actualizado correctamente.';
+                            showSuccessModal('Gasto actualizado con éxito.');
+
+                            // Refrescar tabla de consulta en segundo plano
+                            if (window.__refreshSearch) {
+                                window.__refreshSearch();
+                            }
+                        })
+                        .withFailureHandler(function (err) {
+                            setBusy(saveBtn, false);
+                            showLoader(false);
+                            statusArea.textContent = 'Error al guardar.';
+                            var msg = (err && err.message) ? err.message : 'No se pudo actualizar.';
+                            toast(msg, false);
+                        })
+                        .updateExpense(payload);
+                });
+
+                // Exponer helper para el tab de búsqueda
+                window.__setUpdateDataFromSearch = function (item) {
+                    originalUpdateData = {
+                        gmailMessageId: item.gmailMessageId || '',
+                        amount: item.amount != null ? String(item.amount) : '',
+                        expenseDate: item.expenseDate || '',
+                        source: item.source || '',
+                        comments: item.comments || '',
+                        category: item.category || ''
+                    };
+                    fillUpdateFields(originalUpdateData);
+                    setActiveTab('update');
+                };
+
+                validate();
+            })();
+
+            // ====== Módulo: BUSCAR (SEARCH)
+            (function initSearchTab() {
+                var state = {
+                    page: 1,
+                    pageSize: 10, // máximo 10 por página
+                    total: 0,
+                    totalPages: 0,
+                    filters: { whatEverText: '', from: '', to: '', category: '' }
+                };
+
+                var rows = $('rows');
+                var pageInfo = $('pageInfo');
+                var prevBtn = $('prevBtn');
+                var nextBtn = $('nextBtn');
+                var form = $('filtersForm');
+                var whatEverText = $('whatEverText');
+                var from = $('from');
+                var to = $('to');
+                var categoryInput = $('categoryInputSearch');
+                var clearBtn = $('clearBtn');
+
+                function updatePager() {
+                    pageInfo.textContent = (state.totalPages > 0)
+                        ? 'Página ' + state.page + ' de ' + state.totalPages + ' · ' + state.total + ' registros'
+                        : '—';
+                    prevBtn.disabled = state.page <= 1;
+                    nextBtn.disabled = state.page >= state.totalPages;
+                }
+
+                function render(items) {
+                    rows.innerHTML = '';
+                    if (!items || !items.length) {
+                        rows.innerHTML = '<tr><td colspan="7" class="text-muted">Sin resultados.</td></tr>';
+                        return;
+                    }
+                    items.forEach(function (it) {
+                        var fullComment = it.comments || '';
+                        var displayComment = fullComment;
+                        if (displayComment.length > 30) {
+                            displayComment = displayComment.slice(0, 30) + '…';
+                        }
+
+                        var payload = JSON.stringify(it)
+                            .replace(/"/g, '&quot;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;');
+
+                        var tr = document.createElement('tr');
+                        tr.innerHTML = `
+              <td>${formatDateTime(it.expenseDate)}</td>
               <td>${(it.amount ?? '')}</td>
               <td>${it.currency ?? ''}</td>
               <td>${it.category ?? ''}</td>
-              <td class="text-truncate" title="${fullComment.replace(/"/g,'&quot;')}">${displayComment}</td>
+              <td class="text-truncate" title="${fullComment.replace(/"/g, '&quot;')}">${displayComment}</td>
               <td>${it.source ?? ''}</td>
               <td class="text-end">
                 <button type="button"
@@ -693,86 +732,91 @@
                 </button>
               </td>
             `;
-            rows.appendChild(tr);
-          });
-        }
+                        rows.appendChild(tr);
+                    });
+                }
 
-        function fetchData(){
-          showLoader(true);
-          google.script.run
-            .withSuccessHandler(function(res){
-              showLoader(false);
-              if (!res){ render([]); state.total = 0; state.totalPages = 0; updatePager(); return; }
-              state.total = res.total || 0;
-              state.totalPages = res.totalPages || 0;
-              render(res.items || []);
-              updatePager();
-            })
-            .withFailureHandler(function(err){
-              showLoader(false);
-              toast((err && err.message) ? err.message : 'No se pudo obtener los datos', false);
-            })
-            .findExpensesByFilters({
-              whatEverText: state.filters.whatEverText,
-              from: state.filters.from,
-              to: state.filters.to,
-              category: state.filters.category,
-              page: state.page,
-              pageSize: state.pageSize
-            });
-        }
+                function fetchData() {
+                    showLoader(true);
+                    google.script.run
+                        .withSuccessHandler(function (res) {
+                            showLoader(false);
+                            if (!res) { render([]); state.total = 0; state.totalPages = 0; updatePager(); return; }
+                            state.total = res.total || 0;
+                            state.totalPages = res.totalPages || 0;
+                            render(res.items || []);
+                            updatePager();
+                        })
+                        .withFailureHandler(function (err) {
+                            showLoader(false);
+                            toast((err && err.message) ? err.message : 'No se pudo obtener los datos', false);
+                        })
+                        .findExpensesByFilters({
+                            whatEverText: state.filters.whatEverText,
+                            from: state.filters.from,
+                            to: state.filters.to,
+                            category: state.filters.category,
+                            page: state.page,
+                            pageSize: state.pageSize
+                        });
+                }
 
-        form.addEventListener('submit', function(e){
-          e.preventDefault();
-          state.page = 1;
-          state.filters = {
-            whatEverText: whatEverText.value.trim(),
-            from: from.value || '',
-            to: to.value || '',
-            category: categoryInput.value.trim()
-          };
-          fetchData();
-        });
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    state.page = 1;
+                    state.filters = {
+                        whatEverText: whatEverText.value.trim(),
+                        from: from.value || '',
+                        to: to.value || '',
+                        category: categoryInput.value.trim()
+                    };
+                    fetchData();
+                });
 
-        clearBtn.addEventListener('click', function(){
-          whatEverText.value = '';
-          from.value = '';
-          to.value = '';
-          categoryInput.value = '';
-          state.page = 1;
-          state.filters = { whatEverText:'', from:'', to:'', category:'' };
-          fetchData();
-        });
+                clearBtn.addEventListener('click', function () {
+                    whatEverText.value = '';
+                    from.value = '';
+                    to.value = '';
+                    categoryInput.value = '';
+                    state.page = 1;
+                    state.filters = { whatEverText: '', from: '', to: '', category: '' };
+                    fetchData();
+                });
 
-        prevBtn.addEventListener('click', function(){
-          if (state.page > 1){ state.page--; fetchData(); }
-        });
-        nextBtn.addEventListener('click', function(){
-          if (state.page < state.totalPages){ state.page++; fetchData(); }
-        });
+                prevBtn.addEventListener('click', function () {
+                    if (state.page > 1) { state.page--; fetchData(); }
+                });
+                nextBtn.addEventListener('click', function () {
+                    if (state.page < state.totalPages) { state.page++; fetchData(); }
+                });
 
-        // Delegación: botón Editar
-        rows.addEventListener('click', function(e){
-          var btn = e.target.closest('[data-edit]');
-          if (!btn) return;
-          var raw = btn.getAttribute('data-edit');
-          try{
-            var item = JSON.parse(raw.replace(/&quot;/g,'"').replace(/&lt;/g,'<').replace(/&gt;/g,'>'));
-            if (window.__setUpdateDataFromSearch){
-              window.__setUpdateDataFromSearch(item);
-            }
-          }catch(err){
-            toast('No se pudo abrir el registro para edición.', false);
-          }
-        });
+                // Delegación: botón Editar
+                rows.addEventListener('click', function (e) {
+                    var btn = e.target.closest('[data-edit]');
+                    if (!btn) return;
+                    var raw = btn.getAttribute('data-edit');
+                    try {
+                        var item = JSON.parse(raw.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
+                        if (window.__setUpdateDataFromSearch) {
+                            window.__setUpdateDataFromSearch(item);
+                        }
+                    } catch (err) {
+                        toast('No se pudo abrir el registro para edición.', false);
+                    }
+                });
 
-        // Primera carga de búsqueda
-        fetchData();
-      })();
+                window.__refreshSearch = function () {
+                    fetchData();
+                };
 
-      // Tab inicial según query param (action)
-      setActiveTab(initialTab);
-    })();
-  </script>
+                // Primera carga de búsqueda
+                fetchData();
+            })();
+
+            // Tab inicial según query param (action)
+            setActiveTab(initialTab);
+        })();
+    </script>
 </body>
+
 </html>
