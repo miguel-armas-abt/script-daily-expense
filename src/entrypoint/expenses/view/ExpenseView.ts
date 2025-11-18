@@ -1,8 +1,8 @@
 /// <reference types="google-apps-script" />
 import { Categories } from '../constants/Categories';
+import { DateConstants } from '../constants/DateConstants';
 import { Strings } from '../constants/Strings';
 import { WebActions } from '../constants/WebAction';
-import { TimeUtil } from '../utils/TimeUtil';
 
 const ExpenseView = (() => {
 
@@ -12,7 +12,7 @@ const ExpenseView = (() => {
 
     const tpl = HtmlService.createTemplateFromFile('Index');
     tpl.categories = Categories.DEFAULT_CATEGORIES;
-    tpl.defaultDate = TimeUtil.toTimeZoneString(new Date());
+    tpl.defaultDate = Utilities.formatDate(new Date(), DateConstants.TIME_ZONE, 'yyyy-MM-dd');
     tpl.initialTab = action;
 
     tpl.gmailMessageId = params.gmailMessageId || Strings.EMPTY;

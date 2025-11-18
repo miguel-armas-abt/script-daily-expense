@@ -13,10 +13,9 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <!-- Global styles -->
-  <?!= HtmlService.createHtmlOutputFromFile('Styles').getContent(); ?>
+  <?!= include('Styles'); ?>
+  <?!= include('ComponentStyles'); ?>
 
-  <!-- Specific styles -->
-  <?!= HtmlService.createHtmlOutputFromFile('ComponentStyles').getContent(); ?>
 </head>
 
 <body>
@@ -28,40 +27,49 @@
   </div>
 
   <!-- Header -->
-  <?!= HtmlService.createHtmlOutputFromFile('Header').getContent(); ?>
+  <?!= include('Header'); ?>
 
-  <!-- Contenido principal (tabs + secciones) -->
+  <!-- Main content -->
   <main class="container-narrow">
     <div class="card-surface p-3 p-md-4">
 
-      <!-- Navegación de tabs -->
-      <?!= HtmlService.createHtmlOutputFromFile('TabsNav').getContent(); ?>
+      <!-- Tabs -->
+      <?!= include('TabsNav'); ?>
 
       <!-- TAB: BUSCAR -->
-      <?!= HtmlService.createHtmlOutputFromFile('TabSearch').getContent(); ?>
+      <?!= include('TabSearch'); ?>
 
       <!-- TAB: NUEVO -->
-      <?!= HtmlService.createHtmlOutputFromFile('TabSave').getContent(); ?>
+      <?!= include('TabSave', { defaultDate: defaultDate }); ?>
 
       <!-- TAB: MODIFICAR -->
-      <?!= HtmlService.createHtmlOutputFromFile('TabUpdate').getContent(); ?>
+      <?!= include('TabUpdate'); ?>
 
-      <!-- Datalist compartido de categorías -->
-      <?!= HtmlService.createHtmlOutputFromFile('DatalistCategories').getContent(); ?>
+      <!-- Datalist categorías (necesita 'categories') -->
+      <?!= include('DatalistCategories', { categories: categories }); ?>
     </div>
   </main>
 
   <!-- Toasts + Modales -->
-  <?!= HtmlService.createHtmlOutputFromFile('ToastsAndModals').getContent(); ?>
+  <?!= include('ToastsAndModals'); ?>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
   <!-- JS modular de la app -->
-  <?!= HtmlService.createHtmlOutputFromFile('AppCommon').getContent(); ?>
-  <?!= HtmlService.createHtmlOutputFromFile('AppSave').getContent(); ?>
-  <?!= HtmlService.createHtmlOutputFromFile('AppUpdate').getContent(); ?>
-  <?!= HtmlService.createHtmlOutputFromFile('AppSearch').getContent(); ?>
+  <?!= include('AppCommon', {
+        initialTab: initialTab,
+        gmailMessageId: gmailMessageId,
+        amount: amount,
+        expenseDate: expenseDate,
+        source: source,
+        comments: comments,
+        category: category
+      }); ?>
+
+  <?!= include('AppSave', { defaultDate: defaultDate }); ?>
+  <?!= include('AppUpdate'); ?>
+  <?!= include('AppSearch'); ?>
 </body>
 
 </html>
