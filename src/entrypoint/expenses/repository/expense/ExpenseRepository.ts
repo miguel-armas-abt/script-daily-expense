@@ -94,7 +94,8 @@ export const ExpenseRepository = (() => {
     const data = sheet.getDataRange().getValues();
 
     for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === expense.gmailMessageId) {
+      const gmailColIndex = ExpenseIndex.HEADERS_MAP.gmailMessageId - 1;
+      if (data[i][gmailColIndex] === expense.gmailMessageId) {
         sheet.getRange(i + 1, ExpenseIndex.HEADERS_MAP.amount).setValue(Number(expense.amount));
         sheet.getRange(i + 1, ExpenseIndex.HEADERS_MAP.category).setValue(expense.category);
 
@@ -129,10 +130,10 @@ export const ExpenseRepository = (() => {
       checkedAt: String(r[ExpenseIndex.HEADERS_MAP.checkedAt - 1] ?? Strings.EMPTY),
       source: String(r[ExpenseIndex.HEADERS_MAP.source - 1] ?? Strings.EMPTY),
       currency: String(r[ExpenseIndex.HEADERS_MAP.currency - 1] ?? Strings.EMPTY) as Currency,
-      amount: Number(r[ExpenseIndex.HEADERS_MAP.amount] ?? 0.0),
-      category: String(r[ExpenseIndex.HEADERS_MAP.category] ?? Strings.EMPTY),
-      comments: String(r[ExpenseIndex.HEADERS_MAP.comments] ?? Strings.EMPTY),
-      expenseDate: String(r[ExpenseIndex.HEADERS_MAP.expenseDate] ?? Strings.EMPTY),
+      amount: Number(r[ExpenseIndex.HEADERS_MAP.amount - 1] ?? 0.0),
+      category: String(r[ExpenseIndex.HEADERS_MAP.category - 1] ?? Strings.EMPTY),
+      comments: String(r[ExpenseIndex.HEADERS_MAP.comments - 1] ?? Strings.EMPTY),
+      expenseDate: String(r[ExpenseIndex.HEADERS_MAP.expenseDate - 1] ?? Strings.EMPTY),
     }));
   }
 
