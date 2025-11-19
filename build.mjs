@@ -13,7 +13,7 @@ fs.mkdirSync(DIST, { recursive: true });
 
 // 2) Direct bundle from TS (IIFE format)
 await build({
-  entryPoints: [path.join(SRC, 'entrypoint', 'index.ts')],
+  entryPoints: [path.join(SRC, 'main', 'index.ts')],
   bundle: true,
   outfile: path.join(DIST, 'bundle.js'),
   target: 'es2020',

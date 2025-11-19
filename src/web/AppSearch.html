@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
       tr.innerHTML = ''
         + '<td>' + (it.expenseDate || '') + '</td>'
         + '<td>' + (it.amount ?? '') + '</td>'
-        + '<td>' + (it.currency ?? '') + '</td>'
         + '<td>' + (it.category ?? '') + '</td>'
         + '<td class="text-truncate" title="' + fullComment.replace(/"/g, '&quot;') + '">' + displayComment + '</td>'
         + '<td>' + (it.source ?? '') + '</td>'

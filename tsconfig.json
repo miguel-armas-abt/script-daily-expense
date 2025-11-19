@@ -4,11 +4,11 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "outDir": "dist-tmp",
-    "rootDir": "src/entrypoint",
+    "rootDir": "src/main",
     "strict": true,
     "noImplicitAny": true,
     "lib": ["ES2020", "DOM"],
     "skipLibCheck": true
   },
-  "include": ["src/entrypoint/**/*.ts"]
+  "include": ["src/main/**/*.ts", "src/main/index.ts"]
 }
