@@ -6,11 +6,9 @@ import type { IExpenseHtmlMapper } from '../IExpenseHtmlMapper';
 
 export const BBVABusinessQRHtml = Object.freeze({
 
-  SUBJECT_MERCHANT_QR_REGEX: /pago a comercios con QR/i,
-
-  AMOUNT_AND_CURRENCY_MATCH: /(S\/|\$)\s*([0-9]+(?:[.,][0-9]{2})?)/i,
-
-  MERCHANT_NAME_MATCH: /Comercio(?:\s|&nbsp;)*<\/p>\s*<p[^>]*>\s*([^<]+)/i,
+  SUBJECT_REGEX: /pago a comercios con QR/i,
+  AMOUNT_AND_CURRENCY_REGEX: /(S\/|\$)\s*([0-9]+(?:[.,][0-9]{2})?)/i,
+  RECIPIENT_REGEX: /Comercio(?:\s|&nbsp;)*<\/p>\s*<p[^>]*>\s*([^<]+)/i,
 
   HTML_NBSP: /&nbsp;|&#160;/gi,
   MULTIPLE_SPACES: /\s+/g,
@@ -22,7 +20,7 @@ function getAmountAndCurrency(html: string): {
   currency: Currency;
   matchEndIndex: number;
 } {
-  let match = html.match(BBVABusinessQRHtml.AMOUNT_AND_CURRENCY_MATCH);
+  let match = html.match(BBVABusinessQRHtml.AMOUNT_AND_CURRENCY_REGEX);
 
   if (!match || match.index == null) {
     throw new Error('[bbva-business-qr][mapper] Field not matched: amount & currency');
@@ -42,7 +40,7 @@ function getAmountAndCurrency(html: string): {
 }
 
 function getMerchantName(html: string): string {
-  const merchantMatch = html.match(BBVABusinessQRHtml.MERCHANT_NAME_MATCH);
+  const merchantMatch = html.match(BBVABusinessQRHtml.RECIPIENT_REGEX);
   if (!merchantMatch)
     return Strings.EMPTY;
 
@@ -60,7 +58,7 @@ export const BBVABusinessQRMapper: IExpenseHtmlMapper = {
 
   supports(from: string, subject: string): boolean {
     return BBVAPatterns.FROM_BBVA_PROCESSES_REGEX.test(from) &&
-     BBVABusinessQRHtml.SUBJECT_MERCHANT_QR_REGEX.test(subject);
+     BBVABusinessQRHtml.SUBJECT_REGEX.test(subject);
   },
 
   toEntity(bodyHtml: string): ExpenseEntity {

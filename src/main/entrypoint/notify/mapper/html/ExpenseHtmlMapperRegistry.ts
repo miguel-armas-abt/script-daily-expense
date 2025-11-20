@@ -3,14 +3,20 @@ import { BBVADebitCardMapper } from './bbva/BBVADebitCardMapper';
 import { BBVAPlinMapper } from './bbva/BBVAPlinMapper';
 import { BBVABusinessQRMapper } from './bbva/BBVAMerchantQRMapper';
 import { BBVAServicePaymentMapper } from './bbva/BBVAServicePaymentMapper';
-import { IBKPlinMapper } from './ibk/IBKPlinMapper';
+import { BCPCreditCardMapper } from './bcp/BCPCreditCardMapper';
+import { BCPDebitCardMapper } from './bcp/BCPDebitCardMapper';
+import { BCPYapeMapper } from './bcp/BCPYapeMapper';
+import { BCPYapePaymentMapper } from './bcp/BCPYapeServiceMapper';
 
 const MAPPERS: IExpenseHtmlMapper[] = [
   BBVADebitCardMapper,
   BBVAPlinMapper,
   BBVABusinessQRMapper,
   BBVAServicePaymentMapper,
-  IBKPlinMapper
+  BCPCreditCardMapper,
+  BCPDebitCardMapper,
+  BCPYapeMapper,
+  BCPYapePaymentMapper
 ];
 
 export const MapperRegistry = (() => {

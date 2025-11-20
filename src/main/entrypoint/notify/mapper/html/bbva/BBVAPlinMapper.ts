@@ -6,10 +6,9 @@ import { BBVAPatterns } from '../../../constants/BBVA';
 
 export const BBVAPlinHtml = Object.freeze({
 
-  SUBJECT_PLIN_REGEX: /\bplin\s*$/i,
-  AMOUNT_AND_CURRENCY_MATCH: /Plineaste\s*(S\/|\$)&nbsp;?([0-9]+(?:[.,][0-9]{2})?)/i,
-
-  RECIPIENT_FROM_TAIL: /(?:&nbsp;|\s)*a(?:&nbsp;|\s)+([^<\r\n]+)/i,
+  SUBJECT_REGEX: /\bplin\s*$/i,
+  AMOUNT_AND_CURRENCY_REGEX: /Plineaste\s*(S\/|\$)&nbsp;?([0-9]+(?:[.,][0-9]{2})?)/i,
+  RECIPIENT_REGEX: /(?:&nbsp;|\s)*a(?:&nbsp;|\s)+([^<\r\n]+)/i,
 
   HTML_NBSP: /&nbsp;|&#160;/gi,
   MULTIPLE_SPACES: /\s+/g,
@@ -21,7 +20,7 @@ function getAmountAndCurrency(html: string): {
   currency: Currency;
   matchEndIndex: number;
 } {
-  const match = html.match(BBVAPlinHtml.AMOUNT_AND_CURRENCY_MATCH);
+  const match = html.match(BBVAPlinHtml.AMOUNT_AND_CURRENCY_REGEX);
   if (!match || match.index == null) {
     throw new Error('[bbva-plin][mapper] Field not matched: amount & currency');
   }
@@ -42,7 +41,7 @@ function getAmountAndCurrency(html: string): {
 function getRecipient(html: string, startIndex: number): string {
   const tailHtml = html.slice(startIndex);
 
-  const recipientMatch = tailHtml.match(BBVAPlinHtml.RECIPIENT_FROM_TAIL);
+  const recipientMatch = tailHtml.match(BBVAPlinHtml.RECIPIENT_REGEX);
   if (!recipientMatch)
     return Strings.EMPTY;
 
@@ -60,7 +59,7 @@ export const BBVAPlinMapper: IExpenseHtmlMapper = {
 
   supports(from: string, subject: string): boolean {
     return BBVAPatterns.FROM_BBVA_PROCESSES_REGEX.test(from) &&
-      BBVAPlinHtml.SUBJECT_PLIN_REGEX.test(subject);
+      BBVAPlinHtml.SUBJECT_REGEX.test(subject);
   },
 
   toEntity(bodyHtml: string): ExpenseEntity {

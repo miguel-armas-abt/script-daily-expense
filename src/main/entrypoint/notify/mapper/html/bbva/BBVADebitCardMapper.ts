@@ -6,14 +6,11 @@ import { BBVAPatterns } from '../../../constants/BBVA';
 
 export const BBVADebitCardHtml = Object.freeze({
 
-  SUBJECT_MERCHANT_QR_REGEX: /Has realizado.*consumo.*tarjeta\s*BBVA/i,
-
-  AMOUNT_MATCH: /Monto:\s*<\/p>\s*<p[^>]*>\s*([0-9]+(?:[.,][0-9]{2})?)/i,
-
-  CURRENCY_MATCH: /Moneda:\s*<\/p>\s*<p[^>]*>\s*([A-Z]{3}|S\/|US\$)/i,
-
-  MERCHANT_NAME_P: /Comercio\s*:?\s*<\/p>\s*<p[^>]*>\s*([^<]+)/i,
-  MERCHANT_NAME_TD: /Comercio\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)/i,
+  SUBJECT_REGEX: /Has realizado.*consumo.*tarjeta\s*BBVA/i,
+  AMOUNT_REGEX: /Monto:\s*<\/p>\s*<p[^>]*>\s*([0-9]+(?:[.,][0-9]{2})?)/i,
+  CURRENCY_REGEX: /Moneda:\s*<\/p>\s*<p[^>]*>\s*([A-Z]{3}|S\/|US\$)/i,
+  RECIPIENT_REGEX_P: /Comercio\s*:?\s*<\/p>\s*<p[^>]*>\s*([^<]+)/i,
+  RECIPIENT_REGEX_TD: /Comercio\s*:?\s*<\/td>\s*<td[^>]*>\s*([^<]+)/i,
 
   HTML_NBSP: /&nbsp;|&#160;/gi,
   MULTIPLE_SPACES: /\s+/g,
@@ -21,7 +18,7 @@ export const BBVADebitCardHtml = Object.freeze({
 } as const);
 
 function getAmount(html: string): number {
-  const match = html.match(BBVADebitCardHtml.AMOUNT_MATCH);
+  const match = html.match(BBVADebitCardHtml.AMOUNT_REGEX);
 
   if (!match) {
     throw new Error('[bbva-debit-card][mapper] Field not matched: amount');
@@ -32,7 +29,7 @@ function getAmount(html: string): number {
 }
 
 function getCurrency(html: string): Currency {
-  const match = html.match(BBVADebitCardHtml.CURRENCY_MATCH);
+  const match = html.match(BBVADebitCardHtml.CURRENCY_REGEX);
 
   if (!match) {
     throw new Error('[bbva-debit-card][mapper] Field not matched: currency');
@@ -44,8 +41,8 @@ function getCurrency(html: string): Currency {
 
 function getMerchantName(html: string): string {
   const merchantMatch =
-    html.match(BBVADebitCardHtml.MERCHANT_NAME_P) ||
-    html.match(BBVADebitCardHtml.MERCHANT_NAME_TD);
+    html.match(BBVADebitCardHtml.RECIPIENT_REGEX_P) ||
+    html.match(BBVADebitCardHtml.RECIPIENT_REGEX_TD);
 
   if (!merchantMatch)
     return Strings.EMPTY;
@@ -64,7 +61,7 @@ export const BBVADebitCardMapper: IExpenseHtmlMapper = {
 
   supports(from: string, subject: string): boolean {
     return BBVAPatterns.FROM_BBVA_PROCESSES_REGEX.test(from) &&
-      BBVADebitCardHtml.SUBJECT_MERCHANT_QR_REGEX.test(subject);
+      BBVADebitCardHtml.SUBJECT_REGEX.test(subject);
   },
 
   toEntity(bodyHtml: string): ExpenseEntity {
@@ -75,7 +72,7 @@ export const BBVADebitCardMapper: IExpenseHtmlMapper = {
     const expense = new ExpenseEntity();
     expense.amount = amount;
     expense.currency = currency;
-    expense.source = 'BBVA - TARJETA';
+    expense.source = 'BBVA - CONSUMO DE TARJETA DEBITO';
     expense.comments = merchantName;
     return expense;
   }

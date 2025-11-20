@@ -6,10 +6,9 @@ import { IBKPatterns } from '../../../constants/IBK';
 
 export const IBKPlinHtml = Object.freeze({
 
-  KEY_AMOUNT: /Moneda\s*y\s*monto\s*:?/i,
-  KEY_RECIPIENT: /Destinatario\s*:?/i,
-
-  AMOUNT_AND_CURRENCY_MATCH: /(S\/|\$)(?:\s|&nbsp;|&#160;|<[^>]*>)*([0-9]+(?:[.,][0-9]{2})?)/i,
+  AMOUNT_AND_CURRENCY_KEY_REGEX: /Moneda\s*y\s*monto\s*:?/i,
+  AMOUNT_AND_CURRENCY_REGEX: /(S\/|\$)(?:\s|&nbsp;|&#160;|<[^>]*>)*([0-9]+(?:[.,][0-9]{2})?)/i,
+  RECIPIENT_REGEX: /Destinatario\s*:?/i,
 
   END_TABLE_ROW: /<\/tr>/i,
   TABLE_CELL_VALUE: /<\/td>\s*<td[^>]*>([\s\S]*?)<\/td>/i,
@@ -35,9 +34,9 @@ function getTableRowSliceByKey(html: string, keyPattern: RegExp): string {
 }
 
 function getAmountAndCurrency(html: string): { amount: number; currency: Currency } {
-  const amountRowHtml = getTableRowSliceByKey(html, IBKPlinHtml.KEY_AMOUNT);
+  const amountRowHtml = getTableRowSliceByKey(html, IBKPlinHtml.AMOUNT_AND_CURRENCY_KEY_REGEX);
 
-  const match = amountRowHtml.match(IBKPlinHtml.AMOUNT_AND_CURRENCY_MATCH);
+  const match = amountRowHtml.match(IBKPlinHtml.AMOUNT_AND_CURRENCY_REGEX);
   if (!match) {
     throw new Error('[ibk-plin][mapper] Field not matched: amount & currency');
   }
@@ -53,7 +52,7 @@ function getAmountAndCurrency(html: string): { amount: number; currency: Currenc
 }
 
 function getRecipient(html: string): string {
-  const recipientRowHtml = getTableRowSliceByKey(html, IBKPlinHtml.KEY_RECIPIENT);
+  const recipientRowHtml = getTableRowSliceByKey(html, IBKPlinHtml.RECIPIENT_REGEX);
 
   const recipientMatch = recipientRowHtml.match(IBKPlinHtml.TABLE_CELL_VALUE);
   if (!recipientMatch)
